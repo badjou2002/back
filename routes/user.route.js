@@ -3,7 +3,6 @@ const router = express.Router();
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcrypt');
 const { generateRandomString } = require('../middleware/cryptCle');
 const { verifyToken } = require("../middleware/verifyToken")
 const { transporter } = require("../middleware/mail")
@@ -35,11 +34,9 @@ router.post('/', verifyToken, async (req, res) => {
                 message: "User already exists"
             })
         const passwordGenerer = generateRandomString(8)
-        const salt = await bcrypt.genSalt(10)
-        const password = await bcrypt.hash(passwordGenerer, salt)
         const userCreate = await prisma.user.create({
             data: {
-                email, prenom, nom, role, password, telephone: Number(telephone), image: "https://res.cloudinary.com/dhh8gu8oi/image/upload/v1711056938/images/profile-circle.256x256_rdf7xl.png"
+                email, prenom, nom, role, password:passwordGenerer, telephone: Number(telephone), image: "https://res.cloudinary.com/dhh8gu8oi/image/upload/v1711056938/images/profile-circle.256x256_rdf7xl.png"
             },
         })
         var mailOption = {
@@ -205,7 +202,7 @@ router.post('/login', async (req, res) => {
                 success: false, message: "Compte doesn't exists"
             })
         } else {
-            let isCorrectPassword = await bcrypt.compare(password, user.password)
+            let isCorrectPassword = password== user.password
             if (isCorrectPassword) {
                 const token = generateAccessToken(user);
                 const refreshToken = generateRefreshToken(user);
@@ -322,8 +319,6 @@ router.post('/forgot-password', async (req, res) => {
             return res.status(404).send({ message: "User not existed" })
         }
         const passwordGenerer = generateRandomString(8)
-        const salt = await bcrypt.genSalt(10)
-        const password = await bcrypt.hash(passwordGenerer, salt)
         var mailOptions = {
             from: '"Votre nouveau Compte dans ESPS e-learning " <bil602u@gmail.com>',
             to: email,
@@ -347,7 +342,7 @@ router.post('/forgot-password', async (req, res) => {
         });
         await prisma.user.update({
             data: {
-                password,
+                password:passwordGenerer,
             },
             where: {
                 id: user.id
