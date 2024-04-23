@@ -6,15 +6,12 @@ const app = express()
 
 dotenv.config()
 
-app.route("/", (req, res) => {
-    res.json({ message: "bonjour" });
-})
-
 app.use(express.json());
+
 app.use(cors())
 
-app.route("/", (req, res) => {
-    res.json({ message: "bonjour" });
+app.get("/", (req, res) => {
+    res.status(200).send("bonjour");
 })
 
 const userRouter = require("../routes/user.route")
