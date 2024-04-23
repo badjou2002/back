@@ -1,5 +1,4 @@
 const express = require('express');
-const serverless = require('serverless-http');
 const cors = require('cors')
 const dotenv = require('dotenv')
 const app = express()
@@ -48,4 +47,4 @@ app.use('/api/theme', themeRouter);
 const PORT = process.env.PORT || 3005
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`))
 
-module.exports.handler = serverless(app);
+module.exports = app;
